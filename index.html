@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Praesec Security Audit Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header>
+    <h1>Praesec Security Audit Dashboard</h1>
+    <div class="subtitle">
+      Read-only · Cryptographically Verifiable · Epoch-Scoped
+    </div>
+  </header>
+
+  <!-- 🔐 REQUIRED: epochs container -->
+  <section id="epochs" class="epochs"></section>
+
+  <!-- 🔎 Details panel -->
+  <section id="details" class="details hidden">
+    <h2 id="epoch-title"></h2>
+    <pre id="epoch-data"></pre>
+  </section>
+
+  <footer>
+    🔒 Immutable Audit View
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
