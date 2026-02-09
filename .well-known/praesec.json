@@ -1,33 +1,19 @@
 {
-    "spec": "praesec-transparency-v1",
-    "domain": "praesecinfra.com",
-  
-    "public_key": {
-      "algorithm": "ed25519",
-      "format": "pem",
-      "source": "dns+bundle",
-      "path": "praesec_log/keys/checkpoint_public.pem"
-    },
-  
-    "transparency": {
-      "merkle": {
-        "dns": "_praesec-merkle.praesecinfra.com",
-        "algorithm": "sha256"
-      },
-      "consistency": {
-        "dns": "_praesec-consistency.praesecinfra.com"
-      }
-    },
-  
-    "bundles": {
-      "transparency_log": "https://www.praesecinfra.com/bundles/praesec-transparency-bundle-v1.zip",
-      "merkle_proofs": "https://www.praesecinfra.com/bundles/praesec-merkle-bundle-v1.zip"
-    },
-  
-    "verification": {
-      "cli": "praesec verify praesecinfra.com",
-      "offline": true
-    },
-  
-    "updated_at": "2026-02-07T15:00:00Z"
-  }
+  "project": "Praesec Infrastructure",
+  "domain": "praesecinfra.com",
+  "trust_model": "dns-anchored transparency log",
+  "hash_algorithm": "sha256",
+  "current_epoch": 3,
+  "endpoints": {
+    "merkle_root": "dns:TXT:_praesec-merkle.praesecinfra.com",
+    "consistency_proof": "dns:TXT:_praesec-consistency.praesecinfra.com",
+    "audit_bundles": "/bundles/",
+    "offline_verifier": "praesec verify praesecinfra.com"
+  },
+  "guarantees": [
+    "append-only log",
+    "public verifiability",
+    "offline auditability",
+    "non-repudiation via DNS witnesses"
+  ]
+}
