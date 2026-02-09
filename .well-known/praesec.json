@@ -1,19 +1,36 @@
 {
   "project": "Praesec Infrastructure",
   "domain": "praesecinfra.com",
+
   "trust_model": "dns-anchored transparency log",
   "hash_algorithm": "sha256",
-  "current_epoch": 3,
+
+  "current_epoch": 4,
+  "latest_tree_size": 2,
+
   "endpoints": {
     "merkle_root": "dns:TXT:_praesec-merkle.praesecinfra.com",
     "consistency_proof": "dns:TXT:_praesec-consistency.praesecinfra.com",
-    "audit_bundles": "/bundles/",
+    "audit_bundles": "https://praesecinfra.com/bundles/",
     "offline_verifier": "praesec verify praesecinfra.com"
   },
+
+  "bundles": [
+    {
+      "epoch": 3,
+      "file": "/bundles/praesec-merkle-bundle-v1.zip",
+      "type": "merkle+inclusion",
+      "verified": true
+    }
+  ],
+
   "guarantees": [
     "append-only log",
     "public verifiability",
     "offline auditability",
-    "non-repudiation via DNS witnesses"
-  ]
+    "dns-based non-repudiation",
+    "consistency proofs across epochs"
+  ],
+
+  "last_updated": "2026-02-09"
 }
