@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Praesec Security Audit Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -12,7 +13,34 @@
     <div class="subtitle">
       Read-only · Cryptographically Verifiable · Epoch-Scoped
     </div>
+
+    <!-- 🟢 Transparency Badge -->
+    <div class="trust-badge">
+      <a href="/verify.html" class="badge-link">
+        🔒 Transparency Verified — Epoch 4
+      </a>
+    </div>
   </header>
+
+  <!-- 📊 Transparency Summary -->
+  <section class="transparency-summary">
+    <div class="summary-card">
+      <h3>Current Epoch</h3>
+      <p id="current-epoch">4</p>
+    </div>
+
+    <div class="summary-card">
+      <h3>Merkle Tree Size</h3>
+      <p id="tree-size">2</p>
+    </div>
+
+    <div class="summary-card">
+      <h3>Root Hash</h3>
+      <p class="mono" id="root-hash">
+        a90d74af9b619bdf084ef9bed23ba737ee671d065eb5ffe22ce58b386e981320
+      </p>
+    </div>
+  </section>
 
   <!-- 🔐 REQUIRED: epochs container -->
   <section id="epochs" class="epochs"></section>
@@ -23,8 +51,23 @@
     <pre id="epoch-data"></pre>
   </section>
 
+  <!-- 🧠 Public Verification Instructions -->
+  <section class="verification">
+    <h2>Independent Verification</h2>
+    <p>
+      This dashboard reflects a DNS-anchored transparency log.
+      You can independently verify the integrity using:
+    </p>
+
+    <pre class="mono">praesec verify praesecinfra.com</pre>
+
+    <p>
+      Merkle root and consistency proofs are published via DNS TXT records.
+    </p>
+  </section>
+
   <footer>
-    🔒 Immutable Audit View
+    🔒 Immutable Audit View · DNS Witness Anchored · Append-Only Log
   </footer>
 
   <script src="app.js"></script>
