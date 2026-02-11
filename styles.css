@@ -1,0 +1,250 @@
+/* ===========================
+   GLOBAL
+=========================== */
+
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  
+    background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+    color: #e2e8f0;
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3 {
+    margin: 0;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  /* ===========================
+     HEADER
+  =========================== */
+  
+  header {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+  
+  header h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+  
+  .subtitle {
+    margin-top: 10px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+  }
+  
+  /* ===========================
+     TRUST BADGE
+  =========================== */
+  
+  .trust-badge {
+    margin-top: 20px;
+  }
+  
+  .badge-link {
+    display: inline-block;
+    background: #16a34a;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  .badge-link:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+  }
+  
+  /* ===========================
+     TRANSPARENCY SUMMARY
+  =========================== */
+  
+  .transparency-summary {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .summary-card {
+    background: #1e293b;
+    padding: 25px;
+    border-radius: 14px;
+    min-width: 240px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease;
+  }
+  
+  .summary-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .summary-card h3 {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .summary-card p {
+    font-size: 1rem;
+    font-weight: 500;
+    word-break: break-all;
+  }
+  
+  /* ===========================
+     MONOSPACE
+  =========================== */
+  
+  .mono {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    color: #38bdf8;
+  }
+  
+  /* ===========================
+     EPOCH LIST
+  =========================== */
+  
+  .epochs {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  
+  .epoch-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 4px solid #0ea5e9;
+  }
+  
+  .epoch-card:hover {
+    background: #263449;
+    transform: translateX(5px);
+  }
+  
+  .epoch-card h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .epoch-meta {
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+  
+  /* ===========================
+     DETAILS PANEL
+  =========================== */
+  
+  .details {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 25px;
+    background: #111827;
+    border-radius: 12px;
+    border: 1px solid #1f2937;
+  }
+  
+  .details.hidden {
+    display: none;
+  }
+  
+  .details h2 {
+    margin-bottom: 15px;
+  }
+  
+  .details pre {
+    background: #0b1220;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    color: #38bdf8;
+  }
+  
+  /* ===========================
+     VERIFICATION SECTION
+  =========================== */
+  
+  .verification {
+    padding: 60px 20px;
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+  }
+  
+  .verification h2 {
+    margin-bottom: 20px;
+  }
+  
+  .verification p {
+    color: #94a3b8;
+    margin-bottom: 20px;
+  }
+  
+  .verification pre {
+    background: #111827;
+    padding: 15px;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 0.9rem;
+  }
+  
+  /* ===========================
+     FOOTER
+  =========================== */
+  
+  footer {
+    text-align: center;
+    padding: 30px;
+    background: #111827;
+    margin-top: 60px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    border-top: 1px solid #1f2937;
+  }
+  
+  /* ===========================
+     RESPONSIVE
+  =========================== */
+  
+  @media (max-width: 768px) {
+    header h1 {
+      font-size: 1.6rem;
+    }
+  
+    .transparency-summary {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .summary-card {
+      width: 90%;
+    }
+  
+    .verification {
+      padding: 40px 15px;
+    }
+  }
