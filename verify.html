@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Praesec Transparency Verification</title>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: Arial; background:#0f172a; color:#e2e8f0; padding:40px; }
+    .card { background:#1e293b; padding:30px; border-radius:12px; max-width:700px; }
+    .ok { color:#22c55e; font-weight:bold; }
+    .mono { font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Praesec Transparency Status</h1>
+    <p class="ok">✔ TRUST VERIFIED</p>
+
+    <p><strong>Current Epoch:</strong> 4</p>
+    <p><strong>Tree Size:</strong> 2</p>
+
+    <p><strong>Merkle Root:</strong></p>
+    <p class="mono">
+      a90d74af9b619bdf084ef9bed23ba737ee671d065eb5ffe22ce58b386e981320
+    </p>
+
+    <p>
+      Verify independently:
+      <span class="mono">praesec verify praesecinfra.com</span>
+    </p>
+  </div>
+</body>
+</html>
