@@ -12,25 +12,53 @@
     "merkle_root": "dns:TXT:_praesec-merkle.praesecinfra.com",
     "consistency_proof": "dns:TXT:_praesec-consistency.praesecinfra.com",
     "audit_bundles": "https://praesecinfra.com/bundles/",
+    "bundle_index": "https://praesecinfra.com/bundles/index.json",
     "offline_verifier": "praesec verify praesecinfra.com"
   },
 
   "bundles": [
     {
       "epoch": 3,
-      "file": "/bundles/praesec-merkle-bundle-v1.zip",
       "type": "merkle+inclusion",
+      "file": "/bundles/praesec-merkle-bundle-v1.zip",
+      "root": "7e49c6a51fd597112c7df013624db82ed0f4f593268cc72eb3f36d7537d431da",
+      "verified": true
+    },
+    {
+      "epoch": 4,
+      "type": "transparency+consistency",
+      "file": "/bundles/praesec-transparency-bundle-v1.zip",
+      "root": "a90d74af9b619bdf084ef9bed23ba737ee671d065eb5ffe22ce58b386e981320",
       "verified": true
     }
   ],
+
+  "witnesses": {
+    "dns": {
+      "merkle_record": "_praesec-merkle.praesecinfra.com",
+      "consistency_record": "_praesec-consistency.praesecinfra.com"
+    },
+    "github_release": "https://github.com/parineethboyina007/praesecinfra-site/releases/tag/epoch-4"
+  },
 
   "guarantees": [
     "append-only log",
     "public verifiability",
     "offline auditability",
     "dns-based non-repudiation",
+    "multi-witness anchoring",
     "consistency proofs across epochs"
   ],
+
+  "verification": {
+    "cli": "praesec verify praesecinfra.com",
+    "manual_steps": [
+      "Resolve DNS TXT _praesec-merkle.praesecinfra.com",
+      "Resolve DNS TXT _praesec-consistency.praesecinfra.com",
+      "Download bundle from /bundles/",
+      "Run offline verifier"
+    ]
+  },
 
   "last_updated": "2026-02-09"
 }
