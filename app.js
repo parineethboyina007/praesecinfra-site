@@ -5,25 +5,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const epochData = document.getElementById("epoch-data");
     const header = document.querySelector("header");
   
-    // 🔎 Fetch DNS TXT record using DNS-over-HTTPS (Cloudflare)
+    let simulateTamper = false;
+  
     async function fetchDnsRoot() {
       try {
         const response = await fetch(
           "https://cloudflare-dns.com/dns-query?name=_praesec-merkle.praesecinfra.com&type=TXT",
-          {
-            headers: {
-              "accept": "application/dns-json"
-            }
-          }
+          { headers: { "accept": "application/dns-json" } }
         );
   
         const data = await response.json();
+        if (!data.Answer || data.Answer.length === 0) return null;
   
-        if (!data.Answer || data.Answer.length === 0) {
-          return null;
-        }
-  
-        // Extract TXT value
         const txtRecord = data.Answer[0].data.replace(/"/g, "");
         return txtRecord.replace("sha256=", "");
       } catch (error) {
@@ -32,19 +25,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   
+    function createTamperToggle() {
+      const toggle = document.createElement("button");
+      toggle.className = "tamper-toggle";
+      toggle.textContent = "Simulate Tamper";
+      toggle.onclick = () => {
+        simulateTamper = !simulateTamper;
+        toggle.textContent = simulateTamper
+          ? "Disable Tamper Simulation"
+          : "Simulate Tamper";
+        location.reload();
+      };
+      header.appendChild(toggle);
+    }
+  
     try {
-      // 📦 Load transparency bundle index
       const response = await fetch("/bundles/index.json");
       const index = await response.json();
-  
-      if (!index.bundles || index.bundles.length === 0) {
-        throw new Error("No bundles found in index.json");
-      }
   
       const latestBundle = index.bundles[index.bundles.length - 1];
       const bundleRoot = latestBundle.root;
   
-      // 🗂 Render Epoch Cards
+      // Render Epoch Cards
       index.bundles.forEach(bundle => {
         const card = document.createElement("div");
         card.className = "epoch-card";
@@ -53,22 +55,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           <p>Type: ${bundle.type}</p>
           <p>Root: ${bundle.root.substring(0, 20)}...</p>
         `;
-  
         card.onclick = () => {
           epochTitle.textContent = `Epoch ${bundle.epoch} Details`;
           epochData.textContent = JSON.stringify(bundle, null, 2);
           detailsPanel.classList.remove("hidden");
         };
-  
         epochContainer.appendChild(card);
       });
   
-      // 🔐 LIVE DNS VERIFICATION BADGE
       const badge = document.createElement("div");
       badge.className = "sync-badge";
-  
       badge.innerHTML = "🔎 Verifying DNS Root...";
       header.appendChild(badge);
+  
+      createTamperToggle();
   
       const dnsRoot = await fetchDnsRoot();
   
@@ -78,7 +78,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
   
-      if (dnsRoot === bundleRoot) {
+      const effectiveRoot = simulateTamper
+        ? dnsRoot.substring(0, dnsRoot.length - 1) + "0"
+        : dnsRoot;
+  
+      if (effectiveRoot === bundleRoot) {
         badge.classList.add("verified");
         badge.innerHTML = "🟢 LIVE DNS Verified — Transparency Intact";
       } else {
@@ -87,11 +91,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
   
     } catch (err) {
-      console.error("Error loading transparency index:", err);
-  
-      const errorBadge = document.createElement("div");
-      errorBadge.className = "sync-badge mismatch";
-      errorBadge.innerHTML = "❌ Transparency Index Load Failed";
-      header.appendChild(errorBadge);
+      console.error("Transparency load error:", err);
     }
   });
