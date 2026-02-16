@@ -4,6 +4,7 @@
   
     "trust_model": "dns-anchored transparency log",
     "hash_algorithm": "sha256",
+    "signature_algorithm": "ed25519",
   
     "latest_epoch": 4,
     "latest_tree_size": 2,
@@ -21,6 +22,9 @@
         "type": "transparency+consistency",
         "file": "/bundles/praesec-transparency-bundle-v1.zip",
         "root": "a90d74af9b619bdf084ef9bed23ba737ee671d065eb5ffe22ce58b386e981320",
+        "signature": "PASTE_ROOT_SIG_BASE64_HERE",
+        "public_key": "PASTE_PUBKEY_DER_BASE64_HERE",
+        "signed_at": "2026-02-09T21:00:00Z",
         "verified": true
       }
     ],
@@ -29,6 +33,13 @@
       "manifest": "/.well-known/praesec.json",
       "merkle_root_dns": "_praesec-merkle.praesecinfra.com",
       "consistency_dns": "_praesec-consistency.praesecinfra.com"
+    },
+  
+    "security_model": {
+      "append_only": true,
+      "multi_witness_consensus": true,
+      "cryptographic_root_signing": true,
+      "offline_verifiability": true
     },
   
     "last_updated": "2026-02-09"
