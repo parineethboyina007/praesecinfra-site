@@ -1,0 +1,11 @@
+# Private keys
+*.pem
+
+# Signing artifacts
+canonical.json
+clean.json
+sig.bin
+state.sig
+
+# mac junk
+.DS_Store
