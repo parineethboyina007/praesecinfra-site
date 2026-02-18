@@ -15,13 +15,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
   
       // ===============================
-      // Fetch index.json (raw text)
+      // Fetch RAW index.json text
       // ===============================
   
-      const response = await fetch("/bundles/index.json");
-      const rawText = await response.text();
+      const rawText = await fetch("/bundles/index.json").then(r => r.text());
       const index = JSON.parse(rawText);
-  
       const latest = index.bundles[index.bundles.length - 1];
   
       document.getElementById("current-epoch").textContent = index.latest_epoch;
@@ -29,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("root-hash").textContent = latest.root;
   
       // ===============================
-      // DNS Witness
+      // Witness Consensus
       // ===============================
   
       async function fetchDns() {
@@ -50,53 +48,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         { name: "GitHub", value: latest.root }
       ];
   
-      if (tamper) {
-        witnesses[0].value = "tampered-root";
-      }
+      if (tamper) witnesses[0].value = "tampered-root";
   
-      const unique = new Set(
-        witnesses.map(w => w.value).filter(Boolean)
-      );
+      const unique = new Set(witnesses.map(w => w.value).filter(Boolean));
   
       let consensus = "bad";
       if (unique.size === 1) consensus = "good";
       else if (unique.size === 2) consensus = "warn";
   
       // ===============================
-      // TRUE jq -c -S Canonicalization
+      // jq-Compatible Canonicalization
       // ===============================
   
-      function canonicalize(obj) {
+      function sortKeysDeep(obj) {
         if (Array.isArray(obj)) {
-          return obj.map(canonicalize);
+          return obj.map(sortKeysDeep);
         }
-  
-        if (obj !== null && typeof obj === "object") {
+        if (obj && typeof obj === "object") {
           const sorted = {};
-  
           Object.keys(obj)
             .filter(k => k !== "state_signature" && k !== "signed_state_hash")
             .sort()
             .forEach(k => {
-              sorted[k] = canonicalize(obj[k]);
+              sorted[k] = sortKeysDeep(obj[k]);
             });
-  
           return sorted;
         }
-  
         return obj;
       }
   
-      const canonicalObject = canonicalize(index);
-  
-      // EXACT jq -c equivalent (compact, no spaces, no newline)
+      const canonicalObject = sortKeysDeep(index);
       const canonicalString = JSON.stringify(canonicalObject);
   
-      // DEBUG (optional, remove in production)
-      console.log("Canonical String:", canonicalString);
-  
       // ===============================
-      // SHA256 Hash
+      // SHA256
       // ===============================
   
       async function sha256(str) {
@@ -109,20 +94,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       const computedHash = await sha256(canonicalString);
   
-      console.log("Browser Hash:", computedHash);
-      console.log("Signed Hash:", index.signed_state_hash);
-  
       const hashMatches =
         computedHash === index.signed_state_hash;
   
+      console.log("Browser Hash:", computedHash);
+      console.log("Signed Hash:", index.signed_state_hash);
+  
       // ===============================
-      // Ed25519 Signature Verification
+      // Ed25519 Verify
       // ===============================
   
       async function verifySignature() {
-  
-        if (!index.state_signature || !index.state_public_key)
-          return false;
   
         const signature = Uint8Array.from(
           atob(index.state_signature),
@@ -155,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Signature Valid:", signatureValid);
   
       // ===============================
-      // FINAL BADGE LOGIC
+      // FINAL BADGE
       // ===============================
   
       if (consensus === "good" && hashMatches && signatureValid) {
@@ -179,10 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "CONSENSUS FAILURE — Potential Tampering";
       }
   
-      // ===============================
       // Witness UI
-      // ===============================
-  
       witnesses.forEach(w => {
         const el = document.createElement("div");
         el.className =
@@ -192,10 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         witnessesEl.appendChild(el);
       });
   
-      // ===============================
       // Epoch History
-      // ===============================
-  
       index.bundles.forEach(b => {
         const card = document.createElement("div");
         card.className = "epoch";
@@ -208,10 +184,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
   
     } catch (err) {
-  
       badge.className = "badge bad";
       badge.textContent = "Verification Failed";
-      console.error("Verification Error:", err);
+      console.error(err);
     }
   
   });
