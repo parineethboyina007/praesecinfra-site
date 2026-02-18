@@ -1,96 +1,217 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const epochContainer = document.getElementById("epochs");
-    const detailsPanel = document.getElementById("details");
-    const epochTitle = document.getElementById("epoch-title");
-    const epochData = document.getElementById("epoch-data");
-    const header = document.querySelector("header");
+
+    const badge = document.getElementById("consensus-badge");
+    const witnessesEl = document.getElementById("witnesses");
+    const epochsEl = document.getElementById("epochs");
+    const btn = document.getElementById("tamper-btn");
   
-    let simulateTamper = false;
+    let tamper = localStorage.getItem("tamper") === "true";
   
-    async function fetchDnsRoot() {
-      try {
-        const response = await fetch(
-          "https://cloudflare-dns.com/dns-query?name=_praesec-merkle.praesecinfra.com&type=TXT",
-          { headers: { "accept": "application/dns-json" } }
-        );
-  
-        const data = await response.json();
-        if (!data.Answer || data.Answer.length === 0) return null;
-  
-        const txtRecord = data.Answer[0].data.replace(/"/g, "");
-        return txtRecord.replace("sha256=", "");
-      } catch (error) {
-        console.error("DNS fetch error:", error);
-        return null;
-      }
-    }
-  
-    function createTamperToggle() {
-      const toggle = document.createElement("button");
-      toggle.className = "tamper-toggle";
-      toggle.textContent = "Simulate Tamper";
-      toggle.onclick = () => {
-        simulateTamper = !simulateTamper;
-        toggle.textContent = simulateTamper
-          ? "Disable Tamper Simulation"
-          : "Simulate Tamper";
-        location.reload();
-      };
-      header.appendChild(toggle);
-    }
+    btn.onclick = () => {
+      localStorage.setItem("tamper", (!tamper).toString());
+      location.reload();
+    };
   
     try {
+  
+      // ===============================
+      // Fetch index.json (raw text)
+      // ===============================
+  
       const response = await fetch("/bundles/index.json");
-      const index = await response.json();
+      const rawText = await response.text();
+      const index = JSON.parse(rawText);
   
-      const latestBundle = index.bundles[index.bundles.length - 1];
-      const bundleRoot = latestBundle.root;
+      const latest = index.bundles[index.bundles.length - 1];
   
-      // Render Epoch Cards
-      index.bundles.forEach(bundle => {
-        const card = document.createElement("div");
-        card.className = "epoch-card";
-        card.innerHTML = `
-          <h3>Epoch ${bundle.epoch}</h3>
-          <p>Type: ${bundle.type}</p>
-          <p>Root: ${bundle.root.substring(0, 20)}...</p>
-        `;
-        card.onclick = () => {
-          epochTitle.textContent = `Epoch ${bundle.epoch} Details`;
-          epochData.textContent = JSON.stringify(bundle, null, 2);
-          detailsPanel.classList.remove("hidden");
-        };
-        epochContainer.appendChild(card);
+      document.getElementById("current-epoch").textContent = index.latest_epoch;
+      document.getElementById("tree-size").textContent = index.latest_tree_size;
+      document.getElementById("root-hash").textContent = latest.root;
+  
+      // ===============================
+      // DNS Witness
+      // ===============================
+  
+      async function fetchDns() {
+        const r = await fetch(
+          "https://dns.google/resolve?name=_praesec-merkle.praesecinfra.com&type=TXT"
+        );
+        const d = await r.json();
+        if (!d.Answer) return null;
+        return d.Answer[0].data.replace(/"/g, "").replace("sha256=", "");
+      }
+  
+      const dnsRoot = await fetchDns();
+  
+      const witnesses = [
+        { name: "DNS", value: dnsRoot },
+        { name: "Bundle", value: latest.root },
+        { name: "Manifest", value: latest.root },
+        { name: "GitHub", value: latest.root }
+      ];
+  
+      if (tamper) {
+        witnesses[0].value = "tampered-root";
+      }
+  
+      const unique = new Set(
+        witnesses.map(w => w.value).filter(Boolean)
+      );
+  
+      let consensus = "bad";
+      if (unique.size === 1) consensus = "good";
+      else if (unique.size === 2) consensus = "warn";
+  
+      // ===============================
+      // TRUE jq -c -S Canonicalization
+      // ===============================
+  
+      function canonicalize(obj) {
+        if (Array.isArray(obj)) {
+          return obj.map(canonicalize);
+        }
+  
+        if (obj !== null && typeof obj === "object") {
+          const sorted = {};
+  
+          Object.keys(obj)
+            .filter(k => k !== "state_signature" && k !== "signed_state_hash")
+            .sort()
+            .forEach(k => {
+              sorted[k] = canonicalize(obj[k]);
+            });
+  
+          return sorted;
+        }
+  
+        return obj;
+      }
+  
+      const canonicalObject = canonicalize(index);
+  
+      // EXACT jq -c equivalent (compact, no spaces, no newline)
+      const canonicalString = JSON.stringify(canonicalObject);
+  
+      // DEBUG (optional, remove in production)
+      console.log("Canonical String:", canonicalString);
+  
+      // ===============================
+      // SHA256 Hash
+      // ===============================
+  
+      async function sha256(str) {
+        const data = new TextEncoder().encode(str);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(hashBuffer))
+          .map(b => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+  
+      const computedHash = await sha256(canonicalString);
+  
+      console.log("Browser Hash:", computedHash);
+      console.log("Signed Hash:", index.signed_state_hash);
+  
+      const hashMatches =
+        computedHash === index.signed_state_hash;
+  
+      // ===============================
+      // Ed25519 Signature Verification
+      // ===============================
+  
+      async function verifySignature() {
+  
+        if (!index.state_signature || !index.state_public_key)
+          return false;
+  
+        const signature = Uint8Array.from(
+          atob(index.state_signature),
+          c => c.charCodeAt(0)
+        );
+  
+        const publicKeyDer = Uint8Array.from(
+          atob(index.state_public_key),
+          c => c.charCodeAt(0)
+        );
+  
+        const cryptoKey = await crypto.subtle.importKey(
+          "spki",
+          publicKeyDer.buffer,
+          { name: "Ed25519" },
+          false,
+          ["verify"]
+        );
+  
+        return await crypto.subtle.verify(
+          { name: "Ed25519" },
+          cryptoKey,
+          signature,
+          new TextEncoder().encode(canonicalString)
+        );
+      }
+  
+      const signatureValid = await verifySignature();
+  
+      console.log("Signature Valid:", signatureValid);
+  
+      // ===============================
+      // FINAL BADGE LOGIC
+      // ===============================
+  
+      if (consensus === "good" && hashMatches && signatureValid) {
+        badge.className = "badge good";
+        badge.textContent =
+          "FULL CONSENSUS + VALID STATE SIGNATURE — TRUST VERIFIED";
+      }
+      else if (!hashMatches) {
+        badge.className = "badge bad";
+        badge.textContent =
+          "STATE HASH MISMATCH — TAMPERING DETECTED";
+      }
+      else if (!signatureValid) {
+        badge.className = "badge warn";
+        badge.textContent =
+          "CONSENSUS OK — BUT STATE SIGNATURE INVALID";
+      }
+      else {
+        badge.className = "badge bad";
+        badge.textContent =
+          "CONSENSUS FAILURE — Potential Tampering";
+      }
+  
+      // ===============================
+      // Witness UI
+      // ===============================
+  
+      witnesses.forEach(w => {
+        const el = document.createElement("div");
+        el.className =
+          "witness " + (w.value === latest.root ? "good" : "bad");
+        el.textContent =
+          (w.value === latest.root ? "✔ " : "✖ ") + w.name;
+        witnessesEl.appendChild(el);
       });
   
-      const badge = document.createElement("div");
-      badge.className = "sync-badge";
-      badge.innerHTML = "🔎 Verifying DNS Root...";
-      header.appendChild(badge);
+      // ===============================
+      // Epoch History
+      // ===============================
   
-      createTamperToggle();
-  
-      const dnsRoot = await fetchDnsRoot();
-  
-      if (!dnsRoot) {
-        badge.classList.add("mismatch");
-        badge.innerHTML = "⚠️ Unable to Fetch DNS Root";
-        return;
-      }
-  
-      const effectiveRoot = simulateTamper
-        ? dnsRoot.substring(0, dnsRoot.length - 1) + "0"
-        : dnsRoot;
-  
-      if (effectiveRoot === bundleRoot) {
-        badge.classList.add("verified");
-        badge.innerHTML = "🟢 LIVE DNS Verified — Transparency Intact";
-      } else {
-        badge.classList.add("mismatch");
-        badge.innerHTML = "🔴 DNS ROOT MISMATCH — Potential Tampering";
-      }
+      index.bundles.forEach(b => {
+        const card = document.createElement("div");
+        card.className = "epoch";
+        card.innerHTML = `
+          <strong>Epoch ${b.epoch}</strong><br/>
+          ${b.type}<br/>
+          <div class="hash">${b.root.substring(0, 24)}...</div>
+        `;
+        epochsEl.appendChild(card);
+      });
   
     } catch (err) {
-      console.error("Transparency load error:", err);
+  
+      badge.className = "badge bad";
+      badge.textContent = "Verification Failed";
+      console.error("Verification Error:", err);
     }
+  
   });

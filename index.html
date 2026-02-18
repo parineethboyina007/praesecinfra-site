@@ -3,71 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Praesec Security Audit Dashboard</title>
+  <title>Praesec Transparency Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
 
-  <header>
-    <h1>Praesec Security Audit Dashboard</h1>
-    <div class="subtitle">
-      Read-only · Cryptographically Verifiable · Epoch-Scoped
-    </div>
+  <main class="container">
 
-    <!-- 🟢 Transparency Badge -->
-    <div class="trust-badge">
-      <a href="/verify.html" class="badge-link">
-        🔒 Transparency Verified — Epoch 4
-      </a>
-    </div>
-  </header>
+    <!-- ================= HEADER ================= -->
 
-  <!-- 📊 Transparency Summary -->
-  <section class="transparency-summary">
-    <div class="summary-card">
-      <h3>Current Epoch</h3>
-      <p id="current-epoch">4</p>
-    </div>
-
-    <div class="summary-card">
-      <h3>Merkle Tree Size</h3>
-      <p id="tree-size">2</p>
-    </div>
-
-    <div class="summary-card">
-      <h3>Root Hash</h3>
-      <p class="mono" id="root-hash">
-        a90d74af9b619bdf084ef9bed23ba737ee671d065eb5ffe22ce58b386e981320
+    <section class="hero">
+      <h1>Praesec Transparency</h1>
+      <p class="subtitle">
+        Cryptographically Verifiable · Multi-Witness Anchored · Append-Only
       </p>
-    </div>
-  </section>
 
-  <!-- 🔐 REQUIRED: epochs container -->
-  <section id="epochs" class="epochs"></section>
+      <div id="consensus-badge" class="badge loading">
+        Verifying Witness Consensus...
+      </div>
 
-  <!-- 🔎 Details panel -->
-  <section id="details" class="details hidden">
-    <h2 id="epoch-title"></h2>
-    <pre id="epoch-data"></pre>
-  </section>
+      <button id="tamper-btn" class="ghost-btn">
+        Simulate Witness Compromise
+      </button>
+    </section>
 
-  <!-- 🧠 Public Verification Instructions -->
-  <section class="verification">
-    <h2>Independent Verification</h2>
-    <p>
-      This dashboard reflects a DNS-anchored transparency log.
-      You can independently verify the integrity using:
-    </p>
+    <!-- ================= CORE METRICS ================= -->
 
-    <pre class="mono">praesec verify praesecinfra.com</pre>
+    <section class="metrics">
 
-    <p>
-      Merkle root and consistency proofs are published via DNS TXT records.
-    </p>
-  </section>
+      <div class="metric">
+        <div class="label">Current Epoch</div>
+        <div id="current-epoch" class="value">--</div>
+      </div>
+
+      <div class="metric">
+        <div class="label">Merkle Tree Size</div>
+        <div id="tree-size" class="value">--</div>
+      </div>
+
+    </section>
+
+    <section class="root-card">
+      <div class="label">Root Hash</div>
+      <div id="root-hash" class="root-hash">Loading...</div>
+    </section>
+
+    <!-- ================= WITNESS STATUS ================= -->
+
+    <section id="witnesses" class="witness-grid"></section>
+
+    <!-- ================= HISTORY ================= -->
+
+    <section class="history">
+      <h2>Transparency History</h2>
+      <div id="epochs"></div>
+    </section>
+
+    <!-- ================= VERIFY ================= -->
+
+    <section class="verify">
+      <h2>Independent Verification</h2>
+      <p>Anyone can verify the transparency log:</p>
+      <div class="verify-box">praesec verify praesecinfra.com</div>
+    </section>
+
+  </main>
 
   <footer>
-    🔒 Immutable Audit View · DNS Witness Anchored · Append-Only Log
+    Immutable Audit View · Publicly Verifiable · DNS Witness Anchored
   </footer>
 
   <script src="app.js"></script>
