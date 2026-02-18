@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
     const badge = document.getElementById("consensus-badge");
-    const witnessesEl = document.getElementById("witnesses");
-    const epochsEl = document.getElementById("epochs");
     const btn = document.getElementById("tamper-btn");
   
     let tamper = localStorage.getItem("tamper") === "true";
@@ -14,9 +12,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   
     try {
   
+      // ==========================================
+      // Fetch index.json as TEXT (important)
+      // ==========================================
+  
       const res = await fetch("/bundles/index.json");
-      const text = await res.text();
-      const index = JSON.parse(text);
+      const rawText = await res.text();
+      const index = JSON.parse(rawText);
   
       const latest = index.bundles[index.bundles.length - 1];
   
@@ -24,9 +26,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("tree-size").textContent = index.latest_tree_size;
       document.getElementById("root-hash").textContent = latest.root;
   
-      // ===============================
+      // ==========================================
       // DNS Witness
-      // ===============================
+      // ==========================================
   
       async function fetchDns() {
         const r = await fetch(
@@ -56,32 +58,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (unique.size === 1) consensus = "good";
       else if (unique.size === 2) consensus = "warn";
   
-      // ===============================
-      // jq-compatible canonicalization
-      // ===============================
+      // ==========================================
+      // EXACT jq -c -S compatible canonicalizer
+      // ==========================================
   
-      function stableStringify(obj) {
-        if (obj === null) return "null";
-        if (typeof obj !== "object") return JSON.stringify(obj);
+      function canonicalize(value) {
   
-        if (Array.isArray(obj)) {
-          return "[" + obj.map(stableStringify).join(",") + "]";
+        if (value === null) return "null";
+  
+        if (typeof value !== "object") {
+          return JSON.stringify(value);
         }
   
-        const keys = Object.keys(obj)
+        if (Array.isArray(value)) {
+          return "[" + value.map(v => canonicalize(v)).join(",") + "]";
+        }
+  
+        // object
+        const keys = Object.keys(value)
           .filter(k => k !== "state_signature" && k !== "signed_state_hash")
           .sort();
   
-        return "{" + keys
-          .map(k => JSON.stringify(k) + ":" + stableStringify(obj[k]))
-          .join(",") + "}";
+        return "{" + keys.map(k =>
+          JSON.stringify(k) + ":" + canonicalize(value[k])
+        ).join(",") + "}";
       }
   
-      const canonicalString = stableStringify(index);
+      const canonicalString = canonicalize(index);
   
-      // ===============================
+      // ==========================================
       // SHA256
-      // ===============================
+      // ==========================================
   
       async function sha256(str) {
         const data = new TextEncoder().encode(str);
@@ -98,9 +105,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       const hashMatches = browserHash === index.signed_state_hash;
   
-      // ===============================
-      // Signature Verification
-      // ===============================
+      // ==========================================
+      // Signature Verification (Ed25519)
+      // ==========================================
   
       async function verifySignature() {
   
@@ -137,9 +144,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       console.log("Signature Valid:", signatureValid);
   
-      // ===============================
-      // Final Badge
-      // ===============================
+      // ==========================================
+      // Final Badge Logic
+      // ==========================================
   
       if (consensus === "good" && hashMatches && signatureValid) {
         badge.className = "badge good";
