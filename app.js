@@ -14,12 +14,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   
     try {
   
-      // ===============================
-      // Fetch RAW index.json text
-      // ===============================
+      const res = await fetch("/bundles/index.json");
+      const text = await res.text();
+      const index = JSON.parse(text);
   
-      const rawText = await fetch("/bundles/index.json").then(r => r.text());
-      const index = JSON.parse(rawText);
       const latest = index.bundles[index.bundles.length - 1];
   
       document.getElementById("current-epoch").textContent = index.latest_epoch;
@@ -27,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("root-hash").textContent = latest.root;
   
       // ===============================
-      // Witness Consensus
+      // DNS Witness
       // ===============================
   
       async function fetchDns() {
@@ -48,7 +46,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         { name: "GitHub", value: latest.root }
       ];
   
-      if (tamper) witnesses[0].value = "tampered-root";
+      if (tamper) {
+        witnesses[0].value = "tampered-root";
+      }
   
       const unique = new Set(witnesses.map(w => w.value).filter(Boolean));
   
@@ -57,28 +57,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       else if (unique.size === 2) consensus = "warn";
   
       // ===============================
-      // jq-Compatible Canonicalization
+      // jq-compatible canonicalization
       // ===============================
   
-      function sortKeysDeep(obj) {
+      function stableStringify(obj) {
+        if (obj === null) return "null";
+        if (typeof obj !== "object") return JSON.stringify(obj);
+  
         if (Array.isArray(obj)) {
-          return obj.map(sortKeysDeep);
+          return "[" + obj.map(stableStringify).join(",") + "]";
         }
-        if (obj && typeof obj === "object") {
-          const sorted = {};
-          Object.keys(obj)
-            .filter(k => k !== "state_signature" && k !== "signed_state_hash")
-            .sort()
-            .forEach(k => {
-              sorted[k] = sortKeysDeep(obj[k]);
-            });
-          return sorted;
-        }
-        return obj;
+  
+        const keys = Object.keys(obj)
+          .filter(k => k !== "state_signature" && k !== "signed_state_hash")
+          .sort();
+  
+        return "{" + keys
+          .map(k => JSON.stringify(k) + ":" + stableStringify(obj[k]))
+          .join(",") + "}";
       }
   
-      const canonicalObject = sortKeysDeep(index);
-      const canonicalString = JSON.stringify(canonicalObject);
+      const canonicalString = stableStringify(index);
   
       // ===============================
       // SHA256
@@ -92,19 +91,21 @@ document.addEventListener("DOMContentLoaded", async () => {
           .join("");
       }
   
-      const computedHash = await sha256(canonicalString);
+      const browserHash = await sha256(canonicalString);
   
-      const hashMatches =
-        computedHash === index.signed_state_hash;
-  
-      console.log("Browser Hash:", computedHash);
+      console.log("Browser Hash:", browserHash);
       console.log("Signed Hash:", index.signed_state_hash);
   
+      const hashMatches = browserHash === index.signed_state_hash;
+  
       // ===============================
-      // Ed25519 Verify
+      // Signature Verification
       // ===============================
   
       async function verifySignature() {
+  
+        if (!index.state_signature || !index.state_public_key)
+          return false;
   
         const signature = Uint8Array.from(
           atob(index.state_signature),
@@ -137,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Signature Valid:", signatureValid);
   
       // ===============================
-      // FINAL BADGE
+      // Final Badge
       // ===============================
   
       if (consensus === "good" && hashMatches && signatureValid) {
@@ -160,28 +161,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         badge.textContent =
           "CONSENSUS FAILURE — Potential Tampering";
       }
-  
-      // Witness UI
-      witnesses.forEach(w => {
-        const el = document.createElement("div");
-        el.className =
-          "witness " + (w.value === latest.root ? "good" : "bad");
-        el.textContent =
-          (w.value === latest.root ? "✔ " : "✖ ") + w.name;
-        witnessesEl.appendChild(el);
-      });
-  
-      // Epoch History
-      index.bundles.forEach(b => {
-        const card = document.createElement("div");
-        card.className = "epoch";
-        card.innerHTML = `
-          <strong>Epoch ${b.epoch}</strong><br/>
-          ${b.type}<br/>
-          <div class="hash">${b.root.substring(0, 24)}...</div>
-        `;
-        epochsEl.appendChild(card);
-      });
   
     } catch (err) {
       badge.className = "badge bad";
