@@ -35,9 +35,9 @@
     "cryptographic_state_signing": true,
     "offline_verifiability": true
   },
-  "signed_state_hash": "c2f17a38a7d5362ca810b81db1e9c8c82161abaa0797e8d2a53f1a75dd465662",
-  "state_signature": "nzV8wfjUDDjB6dnaqdBB5b12BbpBXZkVbiiwWRDnroU/B/KorPYvGq+/CQQiN+x8aNOTmuDijgnqzcd34QsHBw==",
-  "state_public_key": "MCowBQYDK2VwAyEAujk7q5+dnPYuyT8GqBkblwfq4KuFLdwftwhIVzOZTqg=",
+  "signed_state_hash": "245cd994aae932ebf837a0566f181ed087c7551b6402af4f6602880554164282",
+  "state_signature": "9IJ/dQunrGNm7W4nX124ewgT9wVxnjT0kfpTbX+SFo0FG3xECToiopY80ic8cNCpcwvYFnF+9ELRhUWrts6NBA==",
+  "state_public_key": "MCowBQYDK2VwAyEAjvaD1PvNhK3v3KaKe+8YQZRNMTJqaoYGeWWk0kLbHe4=",
   "signed_at": "2026-02-16T06:40:00Z",
   "last_updated": "2026-02-16"
 }
