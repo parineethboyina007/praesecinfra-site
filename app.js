@@ -5,20 +5,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   
     let tamper = localStorage.getItem("tamper") === "true";
   
-    btn.onclick = () => {
-      localStorage.setItem("tamper", (!tamper).toString());
-      location.reload();
-    };
+    if (btn) {
+      btn.onclick = () => {
+        localStorage.setItem("tamper", (!tamper).toString());
+        location.reload();
+      };
+    }
   
     try {
   
       // ==========================================
-      // Fetch index.json as TEXT (important)
+      // Fetch index.json
       // ==========================================
   
       const res = await fetch("/bundles/index.json");
-      const rawText = await res.text();
-      const index = JSON.parse(rawText);
+      const index = await res.json();
   
       const latest = index.bundles[index.bundles.length - 1];
   
@@ -27,16 +28,49 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("root-hash").textContent = latest.root;
   
       // ==========================================
-      // DNS Witness
+      // Fetch canonical state (exact signed state)
+      // ==========================================
+  
+      const canonicalResponse = await fetch("/bundles/canonical.json");
+      const canonicalString = await canonicalResponse.text();
+  
+      // ==========================================
+      // SHA256 HASH
+      // ==========================================
+  
+      async function sha256(str) {
+        const data = new TextEncoder().encode(str);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  
+        return Array.from(new Uint8Array(hashBuffer))
+          .map(b => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+  
+      const browserHash = await sha256(canonicalString);
+  
+      console.log("Browser Hash:", browserHash);
+      console.log("Signed Hash:", index.signed_state_hash);
+  
+      const hashMatches = browserHash === index.signed_state_hash;
+  
+      // ==========================================
+      // DNS Witness Check
       // ==========================================
   
       async function fetchDns() {
+  
         const r = await fetch(
           "https://dns.google/resolve?name=_praesec-merkle.praesecinfra.com&type=TXT"
         );
+  
         const d = await r.json();
+  
         if (!d.Answer) return null;
-        return d.Answer[0].data.replace(/"/g, "").replace("sha256=", "");
+  
+        return d.Answer[0].data
+          .replace(/"/g, "")
+          .replace("sha256=", "");
       }
   
       const dnsRoot = await fetchDns();
@@ -55,58 +89,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const unique = new Set(witnesses.map(w => w.value).filter(Boolean));
   
       let consensus = "bad";
+  
       if (unique.size === 1) consensus = "good";
       else if (unique.size === 2) consensus = "warn";
   
       // ==========================================
-      // EXACT jq -c -S compatible canonicalizer
-      // ==========================================
-  
-      function canonicalize(value) {
-  
-        if (value === null) return "null";
-  
-        if (typeof value !== "object") {
-          return JSON.stringify(value);
-        }
-  
-        if (Array.isArray(value)) {
-          return "[" + value.map(v => canonicalize(v)).join(",") + "]";
-        }
-  
-        // object
-        const keys = Object.keys(value)
-          .filter(k => k !== "state_signature" && k !== "signed_state_hash")
-          .sort();
-  
-        return "{" + keys.map(k =>
-          JSON.stringify(k) + ":" + canonicalize(value[k])
-        ).join(",") + "}";
-      }
-  
-      const canonicalString = canonicalize(index);
-  
-      // ==========================================
-      // SHA256
-      // ==========================================
-  
-      async function sha256(str) {
-        const data = new TextEncoder().encode(str);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-        return Array.from(new Uint8Array(hashBuffer))
-          .map(b => b.toString(16).padStart(2, "0"))
-          .join("");
-      }
-  
-      const browserHash = await sha256(canonicalString);
-  
-      console.log("Browser Hash:", browserHash);
-      console.log("Signed Hash:", index.signed_state_hash);
-  
-      const hashMatches = browserHash === index.signed_state_hash;
-  
-      // ==========================================
-      // Signature Verification (Ed25519)
+      // Ed25519 Signature Verification
       // ==========================================
   
       async function verifySignature() {
@@ -149,29 +137,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       // ==========================================
   
       if (consensus === "good" && hashMatches && signatureValid) {
+  
         badge.className = "badge good";
         badge.textContent =
           "FULL CONSENSUS + VALID STATE SIGNATURE — TRUST VERIFIED";
+  
       }
       else if (!hashMatches) {
+  
         badge.className = "badge bad";
         badge.textContent =
           "STATE HASH MISMATCH — TAMPERING DETECTED";
+  
       }
       else if (!signatureValid) {
+  
         badge.className = "badge warn";
         badge.textContent =
           "CONSENSUS OK — BUT STATE SIGNATURE INVALID";
+  
       }
       else {
+  
         badge.className = "badge bad";
         badge.textContent =
           "CONSENSUS FAILURE — Potential Tampering";
+  
       }
   
     } catch (err) {
+  
       badge.className = "badge bad";
       badge.textContent = "Verification Failed";
+  
       console.error(err);
     }
   
