@@ -2,10 +2,13 @@
 *.pem
 
 # Signing artifacts
-canonical.json
+praesec_private.pem
 clean.json
 sig.bin
 state.sig
 
 # mac junk
 .DS_Store
+
+# allow canonical verification file
+!bundles/canonical.json
