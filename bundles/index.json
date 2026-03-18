@@ -18,7 +18,7 @@
       "epoch": 4,
       "type": "transparency+consistency",
       "file": "/bundles/praesec-transparency-bundle-v1.zip",
-      "root": "a90d74af9b619bdf084ef9bed23ba737ee671d065eb5ffe22ce58b386e981320",
+      "root": "4b4e05a53f986603772fd4d14c4ae228c0322d2629baa56cc7eb0523402b3b6a",
       "signed_at": "2026-02-09T21:00:00Z",
       "verified": true
     }
@@ -35,8 +35,8 @@
     "cryptographic_state_signing": true,
     "offline_verifiability": true
   },
-  "signed_state_hash": "245cd994aae932ebf837a0566f181ed087c7551b6402af4f6602880554164282",
-  "state_signature": "9IJ/dQunrGNm7W4nX124ewgT9wVxnjT0kfpTbX+SFo0FG3xECToiopY80ic8cNCpcwvYFnF+9ELRhUWrts6NBA==",
+  "signed_state_hash": "b4cd978f61ca5d7f01c4537e0becd24ea59e48b37fd644359167a69714f027f7",
+  "state_signature": "+fuX2Qeu6CIZ4nA7dYTsX20nkh/UP2m9OXWAYymeohv07uT9NL7NvV3s9MaESuxNL/0LzobY8zIbxql5fIb0Dw==",
   "state_public_key": "MCowBQYDK2VwAyEAjvaD1PvNhK3v3KaKe+8YQZRNMTJqaoYGeWWk0kLbHe4=",
   "signed_at": "2026-02-16T06:40:00Z",
   "last_updated": "2026-02-16"
