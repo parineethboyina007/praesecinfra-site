@@ -12,3 +12,13 @@ state.sig
 
 # allow canonical verification file
 !bundles/canonical.json
+bundle_tmp/
+verify_tmp/
+test_local/
+bundle.zip
+*.zip
+.vscode/
+*.log
+*.bin
+*.der
+*.b64
