@@ -1,20 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
+  <!-- ================= BASIC META ================= -->
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Praesec Transparency Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <title>Praesec Transparency</title>
+
+  <meta name="description" content="Praesec Transparency Log — Cryptographically Verifiable · Multi-Witness Anchored · Append-Only Infrastructure." />
+  <meta name="theme-color" content="#020617" />
+
+  <!-- ================= SOCIAL PREVIEW ================= -->
+
+  <meta property="og:title" content="Praesec Transparency" />
+  <meta property="og:description" content="Cryptographically verifiable transparency log with multi-witness anchoring." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://praesecinfra.com" />
+
+  <!-- ================= FAVICON ================= -->
+
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- ================= CSS ================= -->
+
+  <link rel="stylesheet" href="styles.css?v=1.0.3" />
+
 </head>
 
 <body>
 
   <main class="container">
 
-    <!-- ================= HEADER ================= -->
+    <!-- ================= HERO ================= -->
 
     <section class="hero">
+
       <h1>Praesec Transparency</h1>
+
       <p class="subtitle">
         Cryptographically Verifiable · Multi-Witness Anchored · Append-Only
       </p>
@@ -26,6 +51,7 @@
       <button id="tamper-btn" class="ghost-btn">
         Simulate Witness Compromise
       </button>
+
     </section>
 
     <!-- ================= CORE METRICS ================= -->
@@ -44,36 +70,64 @@
 
     </section>
 
+    <!-- ================= ROOT HASH ================= -->
+
     <section class="root-card">
+
       <div class="label">Root Hash</div>
-      <div id="root-hash" class="root-hash">Loading...</div>
+
+      <div id="root-hash" class="root-hash">
+        Loading...
+      </div>
+
     </section>
 
-    <!-- ================= WITNESS STATUS ================= -->
+    <!-- ================= WITNESSES ================= -->
 
     <section id="witnesses" class="witness-grid"></section>
 
-    <!-- ================= HISTORY ================= -->
+    <!-- ================= TRANSPARENCY HISTORY ================= -->
 
     <section class="history">
+
       <h2>Transparency History</h2>
+
       <div id="epochs"></div>
+
     </section>
 
-    <!-- ================= VERIFY ================= -->
+    <!-- ================= VERIFICATION ================= -->
 
     <section class="verify">
+
       <h2>Independent Verification</h2>
-      <p>Anyone can verify the transparency log:</p>
-      <div class="verify-box">praesec verify praesecinfra.com</div>
+
+      <p>
+        Anyone can verify the transparency log:
+      </p>
+
+      <div class="verify-box">
+        praesec verify praesecinfra.com
+      </div>
+
     </section>
 
   </main>
 
+  <!-- ================= FOOTER ================= -->
+
   <footer>
+
     Immutable Audit View · Publicly Verifiable · DNS Witness Anchored
+
   </footer>
 
-  <script src="app.js"></script>
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <!-- versioned JS prevents browser caching issues -->
+
+  <script src="app.js?v=1.0.4"></script>
+
 </body>
+
 </html>

@@ -1,0 +1,43 @@
+{
+  "project": "Praesec Infrastructure",
+  "domain": "praesecinfra.com",
+  "trust_model": "dns-anchored transparency log",
+  "hash_algorithm": "sha256",
+  "signature_algorithm": "ed25519",
+  "latest_epoch": 4,
+  "latest_tree_size": 2,
+  "bundles": [
+    {
+      "epoch": 3,
+      "type": "merkle+inclusion",
+      "file": "/bundles/praesec-merkle-bundle-v1.zip",
+      "root": "7e49c6a51fd597112c7df013624db82ed0f4f593268cc72eb3f36d7537d431da",
+      "verified": true
+    },
+    {
+      "epoch": 4,
+      "type": "transparency+consistency",
+      "file": "/bundles/praesec-transparency-bundle-v2.zip",
+      "root": "4b4e05a53f986603772fd4d14c4ae228c0322d2629baa56cc7eb0523402b3b6a",
+      "signed_at": "2026-02-09T21:00:00Z",
+      "verified": true
+    }
+  ],
+  "discovery": {
+    "manifest": "/.well-known/praesec.json",
+    "merkle_root_dns": "_praesec-merkle.praesecinfra.com",
+    "consistency_dns": "_praesec-consistency.praesecinfra.com"
+  },
+  "security_model": {
+    "append_only": true,
+    "multi_witness_consensus": true,
+    "cryptographic_root_signing": true,
+    "cryptographic_state_signing": true,
+    "offline_verifiability": true
+  },
+  "signed_state_hash": "6abb8d9c50020df3c0a98d1af64284eb120e0b9d85f255dc648bdfd1ea44340f",
+  "state_signature": "tfU3nJBMJoWLnnLJZSAg1YFGG8KF5eFA+1sS2m43rvAv+W3PvrRTsMShZRDE00oKOBwN9NCHtTl/r/WYBx4nAg==",
+  "state_public_key": "MCowBQYDK2VwAyEAjvaD1PvNhK3v3KaKe+8YQZRNMTJqaoYGeWWk0kLbHe4=",
+  "signed_at": "2026-03-18T06:40:00Z",
+  "last_updated": "2026-03-18"
+}

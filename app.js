@@ -14,11 +14,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   
     try {
   
-      // ==========================================
-      // Fetch index.json
-      // ==========================================
+      // ================================
+      // Cache busting
+      // ================================
   
-      const res = await fetch("/bundles/index.json");
+      const version = Date.now();
+  
+      // ================================
+      // Fetch transparency state
+      // ================================
+  
+      const res = await fetch(`/bundles/index.json?v=${version}`, {
+        cache: "no-store"
+      });
+  
+      if (!res.ok) throw new Error("Failed to fetch index.json");
+  
       const index = await res.json();
   
       const latest = index.bundles[index.bundles.length - 1];
@@ -27,19 +38,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("tree-size").textContent = index.latest_tree_size;
       document.getElementById("root-hash").textContent = latest.root;
   
-      // ==========================================
-      // Fetch canonical state (exact signed state)
-      // ==========================================
+      // ================================
+      // Fetch canonical state
+      // ================================
   
-      const canonicalResponse = await fetch("/bundles/canonical.json");
+      const canonicalResponse = await fetch(`/bundles/canonical.json?v=${version}`, {
+        cache: "no-store"
+      });
+  
+      if (!canonicalResponse.ok)
+        throw new Error("Failed to fetch canonical.json");
+  
       const canonicalString = await canonicalResponse.text();
   
-      // ==========================================
-      // SHA256 HASH
-      // ==========================================
+      // ================================
+      // SHA256
+      // ================================
   
       async function sha256(str) {
+  
         const data = new TextEncoder().encode(str);
+  
         const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   
         return Array.from(new Uint8Array(hashBuffer))
@@ -54,9 +73,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       const hashMatches = browserHash === index.signed_state_hash;
   
-      // ==========================================
-      // DNS Witness Check
-      // ==========================================
+      // ================================
+      // DNS Witness
+      // ================================
   
       async function fetchDns() {
   
@@ -93,9 +112,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (unique.size === 1) consensus = "good";
       else if (unique.size === 2) consensus = "warn";
   
-      // ==========================================
-      // Ed25519 Signature Verification
-      // ==========================================
+      // ================================
+      // Signature Verification
+      // ================================
   
       async function verifySignature() {
   
@@ -132,9 +151,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       console.log("Signature Valid:", signatureValid);
   
-      // ==========================================
-      // Final Badge Logic
-      // ==========================================
+      // ================================
+      // Final badge state
+      // ================================
   
       if (consensus === "good" && hashMatches && signatureValid) {
   
@@ -143,6 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "FULL CONSENSUS + VALID STATE SIGNATURE — TRUST VERIFIED";
   
       }
+  
       else if (!hashMatches) {
   
         badge.className = "badge bad";
@@ -150,6 +170,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "STATE HASH MISMATCH — TAMPERING DETECTED";
   
       }
+  
       else if (!signatureValid) {
   
         badge.className = "badge warn";
@@ -157,6 +178,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "CONSENSUS OK — BUT STATE SIGNATURE INVALID";
   
       }
+  
       else {
   
         badge.className = "badge bad";
@@ -165,12 +187,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       }
   
-    } catch (err) {
+    }
+  
+    catch (err) {
   
       badge.className = "badge bad";
       badge.textContent = "Verification Failed";
   
-      console.error(err);
+      console.error("Verification Error:", err);
+  
     }
   
   });
